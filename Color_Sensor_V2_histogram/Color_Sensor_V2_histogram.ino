@@ -15,9 +15,9 @@ void Publish_Data(float f1, float f2, float f3, float f4,
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) {
-    delay(1);  // wait for Serial Monitor / Plotter
-  }
+  // while (!Serial) {
+  //   delay(1);  // wait for Serial Monitor / Plotter
+  // }
 
   if (!as7341.begin()) {
     Serial.println("Could not find AS7341, check wiring!");
