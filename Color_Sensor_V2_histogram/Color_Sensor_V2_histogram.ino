@@ -4,8 +4,8 @@
 // AS7341 spectral sensor
 Adafruit_AS7341 as7341;
 
-// Sampling delay (ms) — tune with t_step in TFT file for sweep span
-int t_delay = 5;
+// Refresh every 5 seconds
+int t_delay = 5000;
 
 // Display hooks (implemented in 02_TFT_Spectral_Support.ino)
 void TFT_Setup(void);
@@ -15,9 +15,9 @@ void Publish_Data(float f1, float f2, float f3, float f4,
 
 void setup() {
   Serial.begin(115200);
-  // while (!Serial) {
-  //   delay(1);  // wait for Serial Monitor / Plotter
-  // }
+  while (!Serial) {
+    delay(1);  // wait for Serial Monitor / Plotter
+  }
 
   if (!as7341.begin()) {
     Serial.println("Could not find AS7341, check wiring!");
@@ -54,13 +54,7 @@ void loop() {
   uint16_t clr = as7341.getChannel(AS7341_CHANNEL_CLEAR);     // broadband "clear"
   uint16_t nir = as7341.getChannel(AS7341_CHANNEL_NIR);       // near IR
 
-  // Map spectral bands to approximate R, G, B "color" channels.
-  float blue_counts  = (float)f3;   // ~480 nm
-  float green_counts = (float)f5;   // ~555 nm
-  float red_counts   = (float)f7;   // ~630 nm
-  float clear_counts = (float)clr;  // broadband "clear" photodiode
-
-  // -------- Serial output for Arduino Serial Plotter --------
+  // Serial output for debugging / Serial Plotter
   Serial.print("F1_415nm_Violet:");  Serial.print(f1);
   Serial.print(" F2_445nm_Indigo:"); Serial.print(f2);
   Serial.print(" F3_480nm_Blue:");   Serial.print(f3);
@@ -72,16 +66,11 @@ void loop() {
   Serial.print(" Clear_Broad:");     Serial.print(clr);
   Serial.print(" NIR_910nm:");       Serial.print(nir);
   Serial.println();
-  // // Convenience R/G/B series in addition to the raw F1..F8 channels
-  // Serial.print(" R_630nm:"); Serial.print(red_counts);
-  // Serial.print(" G_555nm:"); Serial.print(green_counts);
-  // Serial.print(" B_480nm:"); Serial.print(blue_counts);
-  // Serial.println();
 
-  // -------- Send data to TFT graph (all spectral channels + clear & NIR) --------
+  // Histogram update: all 10 channels
   Publish_Data((float)f1, (float)f2, (float)f3, (float)f4,
                (float)f5, (float)f6, (float)f7, (float)f8,
-               clear_counts, (float)nir);
+               (float)clr, (float)nir);
 
   delay(t_delay);
 }
